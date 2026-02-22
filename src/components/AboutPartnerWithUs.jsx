@@ -2,6 +2,7 @@ import React from 'react';
 import { Compass, Lightbulb, Handshake, ShieldCheck } from 'lucide-react';
 
 const AboutPartnerWithUs = () => {
+  // Vercel deployment trigger comment
   const reasons = [
     {
       title: "Strategy-First Approach",
@@ -30,19 +31,17 @@ const AboutPartnerWithUs = () => {
       <div className="max-w-[1445px] mx-auto px-6 md:px-12 lg:px-16">
         
         {/* Title Section */}
-        {/* Title Section */}
-<div className="mb-16">
-  {/* ইমেজ অনুযায়ী বর্ডারসহ পিল স্টাইল */}
-  <div className="inline-block px-6 py-2 border border-[#1a3a1f] rounded-[5px] bg-[#051109] mb-6">
-    <h2 className="text-[#00ff41] text-[12px] md:text-[14px] font-medium ">
-      The Campaignsquat Edge
-    </h2>
-  </div>
-  
-  <h3 className="text-[26px] md:text-[32px] lg:text-[40px] font-semibold text-white tracking-tighter leading-none block">
-    Why Partner With Us?
-  </h3>
-</div>
+        <div className="mb-16">
+          <div className="inline-block px-6 py-2 border border-[#1a3a1f] rounded-[5px] bg-[#051109] mb-6">
+            <h2 className="text-[#00ff41] text-[12px] md:text-[14px] font-medium ">
+              The Campaignsquat Edge
+            </h2>
+          </div>
+          
+          <h3 className="text-[26px] md:text-[32px] lg:text-[40px] font-semibold text-white tracking-tighter leading-none block">
+            Why Partner With Us?
+          </h3>
+        </div>
 
         {/* Interactive Minimalist List */}
         <div className="flex flex-col">
@@ -51,7 +50,6 @@ const AboutPartnerWithUs = () => {
               key={index} 
               className="group py-8 md:py-10 border-t border-white/10 flex flex-col lg:flex-row lg:items-center justify-between gap-6 transition-all duration-500 hover:bg-white/[0.03] cursor-default px-2"
             >
-              {/* Icon & Title Wrapper */}
               <div className="flex items-center gap-6 flex-1">
                 <div className="text-white group-hover:text-[#f7a400] transition-colors duration-300">
                   {reason.icon}
@@ -61,15 +59,13 @@ const AboutPartnerWithUs = () => {
                 </h4>
               </div>
 
-              {/* Description: Pure White on Hover */}
               <div className="max-w-2xl group-hover:opacity-100 transition-all duration-500 lg:group-hover:-translate-x-4">
-                <p className="text-white text-[12px] md:text-[16px] leading-relaxed">
+                <p className="text-white text-[14px] md:text-[16px] leading-relaxed">
                   {reason.description}
                 </p>
               </div>
             </div>
           ))}
-          {/* Bottom Border */}
           <div className="border-t border-white/10 w-full"></div>
         </div>
       </div>

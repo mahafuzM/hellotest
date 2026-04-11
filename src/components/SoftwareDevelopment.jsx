@@ -27,6 +27,7 @@ import img6 from '../assets/images/original-ad1e136638ef25805d74bc2a9ff8ab7e.web
 import img7 from '../assets/images/479f22210697035.Y3JvcCwyNjA5LDIwNDAsMTM1LDA.png';
 import img8 from '../assets/images/original-e2914736408e4069af7f75a4d351c1b7.webp';
 import BrandSlider from './BrandSlider';
+import DynamicSchema from './DynamicSchema';
 
 const SoftwareDevelopment = () => {
 
@@ -142,6 +143,8 @@ const SoftwareDevelopment = () => {
     ];
 
     return (
+        <>
+        <DynamicSchema  pageTitle="Software Development Services" />
         <main className="overflow-hidden font-poppins bg-[#02050a]">
             <Helmet>
                 <title>Custom Software Development Services | Campaignsquat Ltd.</title>
@@ -407,6 +410,7 @@ const SoftwareDevelopment = () => {
             {/* Questions section is called here */}
             <Questions />
         </main>
+        </>
     );
 };
 

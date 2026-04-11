@@ -1,13 +1,40 @@
-import React from 'react';
-/* 1. Import the hero image from assets */
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
+/* ১. স্ট্যাটিক ফলব্যাক ইমেজ (যদি ডাটাবেসে ছবি না থাকে) */
 import heroImg from '../assets/images/pexels-fauxels-3184421.jpg';
 
 const AboutHero = () => {
+  // ২. ডাইনামিক কন্টেন্ট স্টেট
+  const [content, setContent] = useState({
+    title: "About Campaignsquat Ltd. \n Empowering Brands Through Digital Innovation",
+    description: "we don't just build digital products; we craft experiences that drive growth. We are a full-service digital agency dedicated to transforming complex challenges into seamless, user-centric solutions.",
+    imageUrl: heroImg
+  });
+
+  // ৩. ডাটাবেস থেকে ডাটা নিয়ে আসা
+  useEffect(() => {
+    const fetchHeroData = async () => {
+      try {
+        const res = await axios.get('http://localhost:5000/api/about-content/hero');
+        if (res.data && res.data.title) {
+          setContent({
+            title: res.data.title,
+            description: res.data.description,
+            // ইমেজ থাকলে সার্ভারের ফুল পাথ সহ সেট হবে, না থাকলে ফলব্যাক ইমেজ
+            imageUrl: res.data.imageUrl ? `http://localhost:5000${res.data.imageUrl}` : heroImg
+          });
+        }
+      } catch (err) {
+        console.log("Using static content due to connection issue.");
+      }
+    };
+    fetchHeroData();
+  }, []);
+
   return (
-    // Section-e px-4 (mobile) ar md:px-10 (laptop) add kora hoyeche jate side padding thake
-    <section className="w-full bg-[#050505] pt-10 md:pt-16 pb-16 md:pb-20 px-4 md:px-10 lg:px-16 font-poppins">
+    <section className="w-full bg-[#050505] pt-10 md:pt-16 pb-16 md:pb-20 px- md:px-10 lg:px-16 font-poppins">
       
-      {/* Running Border Animation CSS */}
+      {/* ডিজাইন এবং এনিমেশন একদম আগের মতোই আছে */}
       <style>{`
         @keyframes rotate-border {
           from { transform: rotate(0deg); }
@@ -40,33 +67,32 @@ const AboutHero = () => {
         }
       `}</style>
 
-      {/* Main Container: Max width ektu komiye side padding ensure kora hoyeche */}
-      <div className="max-w-[1250px] mx-auto flex flex-col items-center">
+      <div className="max-w-[1350px] mx-auto flex flex-col items-center">
         
-        {/* 2. Headline */}
-        <h1 className="text-white text-[26px] md:text-[32px] lg:text-[40px] font-semibold text-center mb-10 md:mb-16 max-w-[1000px] leading-[1.2] md:leading-tight">
-          About Campaignsquat Ltd. <br className="hidden md:block" /> 
-         Empowering Brands Through Digital Innovation
+        {/* ৪. ডাইনামিক টাইটেল (whitespace-pre-line ব্যবহার করা হয়েছে যাতে \n কাজ করে) */}
+        <h1 className="text-white text-[26px] md:text-[32px] lg:text-[40px] font-semibold text-center mb-10 md:mb-16 max-w-[1000px] leading-[1.2] md:leading-tight ">
+          {content.title}
         </h1>
+
+        {/* ৫. ডাইনামিক ডেসক্রিপশন */}
         <p className="text-white text-[16px] md:[18px] lg:text-[20px] text-center mb-10 md:mb-16 max-auto leading-relaxed">
-         we don't just build digital products; we craft experiences that drive growth. We are a full-service digital agency dedicated to transforming complex challenges into seamless, user-centric solutions. From startups to established enterprises, we help businesses navigate the digital landscape with precision and creativity.
+          {content.description}
         </p>
 
-        {/* 3. Hero Image Section */}
-        {/* Laptop-e jate baire na jay tai w-[95%] deya hoyeche */}
+        {/* ৬. ডাইনামিক ইমেজ সেকশন */}
         <div className="w-[100%] md:w-[95%] lg:w-full running-border-wrapper rounded-[10px] shadow-2xl border border-white/10">
           
           <div className="running-border-line"></div>
 
-          {/* Height adjustment for laptop screens */}
-          <div className="inner-img-box rounded-[5px] h-[250px] sm:h-[350px] md:h-[450px] lg:h-[550px]">
+         <div className="inner-img-box rounded-[5px] h-[250px] sm:h-[350px] md:h-[450px] lg:h-[550px]">
             <img 
-              src={heroImg} 
-              alt="Digital Experiences"
+              src={content.imageUrl} 
+              alt="Campaignsquat Digital"
               className="w-full h-full object-cover hover:scale-105 transition-transform duration-1000 ease-in-out"
+              /* ইমেজ লোড না হলে ফলব্যাক দেখানোর জন্য */
+              onError={(e) => { e.target.src = heroImg; }}
             />
           </div>
-
         </div>
       </div>
     </section>

@@ -1,10 +1,10 @@
-import React, { useEffect } from 'react'; // 1. useEffect import kora hoyeche
+import React, { useEffect } from 'react';
+import { Helmet } from 'react-helmet-async'; // ১. ইম্পোর্ট করবি
 import ServiceHero from '../components/ServiceHero';
 import ServiceUi from '../components/ServiceUi';
-import ServiceWeb from '../components/ServiceWeb';
-import ServiceSoftwer from '../components/ServiceSoftwer';
-import ServiceMobile from '../components/ServiceMobile';
+
 import Contact from '../components/Contact';
+import DynamicSchema from '../components/DynamicSchema';
 
 const Service = () => {
   
@@ -15,20 +15,22 @@ const Service = () => {
 
   return (
     <main className="bg-[#02050A]">
+      {/* ৩. Service Page-এর জন্য SEO মেটা ট্যাগ */}
+      <DynamicSchema />
+      <Helmet>
+        <title>Our Services | Campaignsquat Ltd - UI/UX, Web & App Development</title>
+        <meta name="description" content="Explore our wide range of services including professional UI/UX design, custom web development, enterprise software solutions, and cross-platform mobile app development." />
+        <meta name="keywords" content="UI/UX Design Services, Web Development Agency, Software Solutions, Mobile App Development, ERP/CRM Systems, Campaignsquat" />
+        <link rel="canonical" href="https://www.campaignsquat.com/service" />
+      </Helmet>
+
       {/* Section 1: Hero Section */}
       <ServiceHero />
       
       {/* Section 2: UI/UX Services */}
       <ServiceUi />
 
-      {/* Section 3: Web Development */}
-      <ServiceWeb />
-
-      {/* Section 4: Software Solutions */}
-      <ServiceSoftwer />
       
-      {/* Section 5: Mobile App Development */}
-      <ServiceMobile />
      
       {/* Section 6: Global Contact */}
       <Contact />

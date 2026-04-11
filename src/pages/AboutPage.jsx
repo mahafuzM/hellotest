@@ -1,4 +1,6 @@
-import React, { useEffect } from 'react'; // useEffect add kora hoyeche
+import React, { useEffect } from 'react';
+import { Helmet } from 'react-helmet-async'; // ১. এইটা ইমপোর্ট করবি
+
 /* 1. Importing all About Page Sections */
 import AboutHero from '../components/AboutHero';
 import AboutVision from '../components/AboutVision';
@@ -8,8 +10,7 @@ import AboutRecognition from '../components/AboutRecognition';
 import AboutTeam from '../components/AboutTeam';
 import AboutGallery from '../components/AboutGallery';
 import Contact from '../components/Contact';
-import AboutCoreExpertise from '../components/AboutCoreExpertise';
-import AboutPartnerWithUs from '../components/AboutPartnerWithUs';
+import DynamicSchema from '../components/DynamicSchema';
 
 const About = () => {
 
@@ -20,10 +21,17 @@ const About = () => {
 
   return (
     <main className="bg-[#02050A]">
+      <DynamicSchema />
+      {/* ২. SEO Meta Tags for About Page */}
+      <Helmet>
+        <title>About Us | Campaignsquat Ltd - Your Innovation Partner</title>
+        <meta name="description" content="Discover Campaignsquat Ltd's journey, our mission to drive digital excellence, and the expert team building next-gen UI/UX, web, and software solutions." />
+        <meta name="keywords" content="Campaignsquat Team, Our Mission, Digital Agency Vision, UI/UX Experts, Software Engineers" />
+        <link rel="canonical" href="https://www.campaignsquat.com/about-us" />
+      </Helmet>
+
       {/* Section 1: Hero Section */}
       <AboutHero />
-
-      <AboutCoreExpertise />
 
       {/* Section 2: Excellence Through Innovation Section */}
       <AboutVision />
@@ -39,8 +47,6 @@ const About = () => {
 
       {/* Section 6: Recognition */}
       <AboutRecognition />
-
-      <AboutPartnerWithUs />
 
       {/* Section 7: Team */}
       <AboutTeam />

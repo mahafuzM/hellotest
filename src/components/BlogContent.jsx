@@ -1,178 +1,91 @@
-import React, { useState } from 'react';
-import { Search } from 'lucide-react'; 
-import { Link } from 'react-router-dom'; 
+import React, { useState, useEffect, useMemo } from 'react';
+import axios from 'axios';
+import { Search, SearchX, ArrowRight } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
-// ইমেজ ইমপোর্ট
-import blogImg1 from '../assets/images/scalable-design-systems.webp';
-import blogImg2 from '../assets/images/user-research-behavioral-psychology.webp';
-import blogImg3 from '../assets/images/interaction-design-motion-ux.webp';
-import blogImg4 from '../assets/images/custom-ecommerce-web-development.webp'; 
-import blogImg5 from '../assets/images/benefits-custom-web-development-2025.webp';    
-import blogImg6 from '../assets/images/laravel-web-development-services.webp';
-import blogImg7 from '../assets/images/modern-software-development-trends-2026.webp';
-import blogImg8 from '../assets/images/typescript-enterprise-software.webp';
-import blogImg9 from '../assets/images/ai-driven-software-testing.webp';
-import blogImg10 from '../assets/images/enterprise-web-app-strategic-guide.webp';
-import blogImg11 from '../assets/images/flutter-vs-reactnative-vs-kmp-2026.webp';
-import blogImg12 from '../assets/images/advanced-mobile-ui-ux-principles.webp';
 
 const BlogContent = () => {
-  // Logic: 'All' category default thakbe
+  // ১. মেমোরি (sessionStorage) থেকে সাথে সাথে ডেটা নিয়ে আসা
+  const [allPosts, setAllPosts] = useState(() => {
+    const saved = sessionStorage.getItem('cached_blogs');
+    return saved ? JSON.parse(saved) : [];
+  });
+
+  const [loading, setLoading] = useState(allPosts.length === 0);
   const [activeCategory, setActiveCategory] = useState('All');
-  const [visibleCount, setVisibleCount] = useState(3); // Shuru te 3 ti card dekhabe
+  const [visibleCount, setVisibleCount] = useState(3);
+  const [searchQuery, setSearchQuery] = useState('');
 
   const categories = ['All', 'Ui/Ux Design', 'Web Development', 'Software Development', 'Mobile Apps Development'];
+  const BASE_URL = 'http://localhost:5000';
 
-  const allPosts = [
-    // UI/UX Design
-   { 
-  id: 1, 
-  category: "Ui/Ux Design", 
-  title: "Building Scalable Design Systems: The Secret to Enterprise-Level UI/UX Consistency", 
-  url: "building-scalable-design-systems-2026", 
-  date: "Feb 22, 2026", 
-  author: "Md Maharab Biswas Api", 
-  img: blogImg1,
-  description: "Stop reinventing the wheel. Learn how to build a unified design system that bridges the gap between designers and developers while scaling your brand."
-},
-   { 
-  id: 2, 
-  category: "Ui/Ux Design", 
-  title: "User Research & Behavioral Psychology: The Foundation of Data-Driven UX", 
-  url: "user-research-behavioral-psychology-ux-2026", 
-  date: "Feb 25, 2026", 
-  author: "Md Maharab Biswas Api", 
-  img: blogImg2,
-  description: "Stop designing by guesswork. Discover how behavioral psychology and data-driven research uncover exactly what your users need and how they think."
-},
-   { 
-  id: 3, 
-  category: "Ui/Ux Design", 
-  title: "Interaction Design & Motion UX: Bringing Digital Products to Life in 2026", 
-  url: "interaction-design-motion-ux-principles-2026", 
-  date: "Feb 28, 2026", 
-  author: "Md Maharab Biswas Api", 
-  img: blogImg3,
-  description: "Static design is dead. Learn how to use motion, micro-interactions, and sensory feedback to create deeply engaging and fluid digital experiences."
-},
+  useEffect(() => {
+    const fetchBlogs = async () => {
+      try {
+        const res = await axios.get(`${BASE_URL}/api/blogs`);
+        
+        if (res.data && Array.isArray(res.data)) {
+          const sortedData = res.data.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+          const currentCached = sessionStorage.getItem('cached_blogs');
+          if (JSON.stringify(sortedData) !== currentCached) {
+            setAllPosts(sortedData);
+            sessionStorage.setItem('cached_blogs', JSON.stringify(sortedData));
+          }
+        }
+      } catch (err) {
+        console.error("Fetch error:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchBlogs();
+  }, []);
 
-    // Web Development
-    // BlogContent.js er bhetore
-{ 
-  id: 4, 
-  category: "Web Development", // Category spelling check koro
-  title: "Custom Web Development for E-Commerce Success", 
-  url: "custom-web-development-ecommerce-guide", // BlogDetails er key-er sathe mil thakte hobe
-  date: "Feb 20, 2026", 
-  author: "Admin", 
-  img: blogImg4,
-  description: "Learn how custom web development can transform your e-commerce store into a high-converting machine with scalability and unique features."
-},
-   { 
-  id: 5, 
-  category: "Web Development", 
-  title: "Top 7 Benefits of Custom Web Development Services for Growing Businesses in 2025", 
-  url: "top-7-benefits-custom-web-development-2025", 
-  date: "Jul 06, 2025", 
-  author: "Md Maharab Biswas Api", 
-  img: blogImg5,
-  description: "In the fast-evolving digital landscape of 2025, generic templates limit your potential. Discover why custom web development is essential for survival and growth."
-},
-   { 
-  id: 6, 
-  category: "Web Development", 
-  title: "Laravel Web Development Services: Build Robust & Scalable Apps with Campaignsquat", 
-  url: "laravel-web-development-services-campaignsquat", 
-  date: "Jul 06, 2025", 
-  author: "Md Maharab Biswas Api", 
-  img: blogImg6,
-  description: "In today’s digital era, businesses need websites and applications that are fast, secure, and scalable. Discover why Laravel is the top choice for 2025."
-},
+  // ২. ফিল্টারিং লজিক (তোমার অরিজিনাল ডিজাইন ডেটা অনুযায়ী)
+  const filteredPosts = useMemo(() => {
+    return allPosts.filter(post => {
+      // ক্যাটাগরি ম্যাচিং
+      const matchesCategory = activeCategory === 'All' || post.category === activeCategory;
+      
+      // সার্চ কোয়েরি ম্যাচিং (টাইটেল, ডেসক্রিপশন এবং ক্যাটাগরি এর মধ্যে খুঁজবে)
+      const query = searchQuery.toLowerCase();
+      const matchesSearch = 
+        (post.title?.toLowerCase() || "").includes(query) || 
+        (post.description?.toLowerCase() || "").includes(query) ||
+        (post.category?.toLowerCase() || "").includes(query);
 
-    // Software Development
-   { 
-  id: 7, 
-  category: "Software Development", 
-  title: "Modern Software Development Trends 2026: A Complete Guide for Growing Businesses", 
-  url: "software-development-trends-2026-complete-guide", 
-  date: "Jan 10, 2026", 
-  author: "Md Maharab Biswas Api", 
-  img: blogImg7,
-  description: "Explore how custom software development is evolving in 2026 and why businesses need scalable, cloud-native solutions to stay competitive."
-},
-   { 
-  id: 8, 
-  category: "Software Development", 
-  title: "Why TypeScript is Essential for Enterprise Grade Software in 2026", 
-  url: "essential-typescript-enterprise-software-2026", // Updated URL
-  date: "Jan 03, 2026", 
-  author: "Md Maharab Biswas Api", 
-  img: blogImg8,
-  description: "Explore why massive codebases rely on TypeScript for stability, maintainability, and error prevention in modern software engineering."
-},
-   { 
-  id: 9, 
-  category: "Software Development", 
-  title: "AI-Driven Software Testing: How Artificial Intelligence is Transforming QA in 2026", 
-  url: "ai-driven-software-testing-future-of-qa", 
-  date: "Jan 15, 2026", 
-  author: "Md Maharab Biswas Api", 
-  img: blogImg9,
-  description: "Traditional testing can't keep up with modern speed. Explore how AI-driven self-healing scripts and predictive analysis are revolutionizing software quality."
-},
-
-    // Mobile Apps Development
-   { 
-  id: 10, 
-  category: "Mobile Apps Development", // Category ta eikhane thik rakho
-  title: "Enterprise Web App Development: A Strategic Guide for Modern Businesses", 
-  url: "strategic-guide-enterprise-web-app-development", 
-  date: "Jul 06, 2025", 
-  author: "Md Maharab Biswas Api", 
-  img: blogImg10,
-  description: "Beyond simple websites, enterprises need scalable and secure web applications to drive operations. Discover our complete guide to enterprise-grade solutions."
-},
-  { 
-  id: 11, 
-  category: "Mobile Apps Development", 
-  title: "The 2026 Battle: Flutter, React Native, or Kotlin Multiplatform?", 
-  url: "flutter-vs-reactnative-vs-kmp-comparison-2026", 
-  date: "Feb 15, 2026", 
-  author: "Md Maharab Biswas Api", 
-  img: blogImg11,
-  description: "Which framework should you choose in 2026? A deep technical comparison of architecture, performance, and ecosystem for Flutter, React Native, and KMP."
-},
-    { 
-  id: 12, 
-  category: "Mobile Apps Development", 
-  title: "The Art of Engagement: Advanced Mobile UI/UX Design Principles for 2026", 
-  url: "advanced-mobile-ui-ux-design-principles-2026", 
-  date: "Feb 20, 2026", 
-  author: "Md Maharab Biswas Api", 
-  img: blogImg12,
-  description: "Beyond aesthetics: Learn the psychology and ergonomics behind world-class mobile user experiences, from the 'Thumb Zone' to predictive UI."
-},
-  ];
-
-  // Logic: Filter posts and slice for Load More
-  const filteredPosts = activeCategory === 'All' 
-    ? allPosts 
-    : allPosts.filter(post => post.category === activeCategory);
+      return matchesCategory && matchesSearch;
+    });
+  }, [activeCategory, searchQuery, allPosts]);
 
   const displayedPosts = filteredPosts.slice(0, visibleCount);
 
-  const handleLoadMore = () => {
-    setVisibleCount(prevCount => prevCount + 3);
-  };
+  const handleLoadMore = () => setVisibleCount(prev => prev + 3);
 
   const handleCategoryChange = (cat) => {
     setActiveCategory(cat);
-    setVisibleCount(3); // Category change hole abar 3 ta card theke shuru hobe
+    setVisibleCount(3);
   };
+
+  const fixImagePath = (path) => {
+    if (!path) return "https://via.placeholder.com/800x400";
+    let cleanPath = path.replace(/\\/g, '/');
+    if (cleanPath.startsWith('/')) cleanPath = cleanPath.substring(1);
+    return `${BASE_URL}/${cleanPath}`;
+  };
+
+  if (loading && allPosts.length === 0) {
+    return (
+      <div className="bg-[#02030a] min-h-screen flex flex-col items-center justify-center text-white font-poppins">
+        <div className="w-12 h-12 border-4 border-[#F7A400] border-t-transparent rounded-full animate-spin mb-4"></div>
+        <p className="text-[10px] uppercase tracking-[4px] font-bold">Syncing Campaignsquat Insights...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="bg-[#02030a] min-h-screen text-white font-poppins selection:bg-white selection:text-black overflow-x-hidden -mt-6 md:-mt-8">
-      <div className="max-w-[1440px] mx-auto px-6 md:px-12 lg:px-20 py-10 md:py-20">
+      <div className="max-w-[1440px] mx-auto px-2 md:px-12 lg:px-20 py-10 md:py-20">
         <div className="flex flex-col lg:flex-row gap-10 lg:gap-16">
           
           <aside className="w-full lg:w-[400px] shrink-0 bg-[#0a0a0a] border border-[#ffffff20] rounded-[5px] p-8 py-12 flex flex-col gap-14 h-fit">
@@ -180,7 +93,10 @@ const BlogContent = () => {
               <h3 className="text-[20px] md:text-[22px] font-semibold text-white">Search</h3>
               <div className="relative">
                 <input 
-                  type="text" placeholder="Search" 
+                  type="text" 
+                  placeholder="Search" 
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
                   className="w-full h-12 bg-[#ffffff10] text-white border border-[#ffffff20] rounded-[5px] px-4 pr-12 focus:outline-none focus:border-[#f7a400] transition-all placeholder:text-white/40"
                 />
                 <div className="absolute right-4 top-1/2 -translate-y-1/2 text-[#f7a400] cursor-pointer hover:scale-110 transition-transform">
@@ -217,18 +133,15 @@ const BlogContent = () => {
 
             <div className="flex flex-col gap-12">
               <h3 className="text-lg font-semibold text-white">Recent Posts</h3>
-              {[
-                { title: "How to design a website: A complete guide.", date: "Jan 4, 2026", img: blogImg1 },
-                { title: "The Future Web Development 2026", date: "Jan 2, 2026", img: blogImg2 }
-              ].map((post, idx) => (
+              {allPosts.slice(0, 2).map((post, idx) => (
                 <div key={idx} className="group cursor-pointer flex flex-col gap-5 border-b border-[#ffffff10] pb-8 last:border-none last:pb-0">
                   <div className="relative overflow-hidden rounded-[5px] h-48 border border-[#ffffff15]">
                     <div className="absolute top-4 left-4 z-10 bg-[#f7a400] text-white px-5 py-1.5 rounded-[5px] text-[11px] font-bold tracking-widest">
-                      {post.date}
+                      {new Date(post.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
                     </div>
-                    <img src={post.img} alt="post" className="w-full h-full object-cover opacity-80 group-hover:scale-105 transition-all duration-700" />
+                    <img src={fixImagePath(post.image)} alt="post" className="w-full h-full object-cover opacity-80 group-hover:scale-105 transition-all duration-700" />
                   </div>
-                  <p className="text-[16px] md:text-[18px] font-bold leading-tight text-white group-hover:underline underline-offset-4">{post.title}</p>
+                  <Link to={`/blog/${post.url}`} className="text-[16px] md:text-[18px] font-bold leading-tight text-white group-hover:underline underline-offset-4">{post.title}</Link>
                 </div>
               ))}
             </div>
@@ -239,7 +152,11 @@ const BlogContent = () => {
               <h3 className="text-lg font-semibold text-white tracking-widest">Tags</h3>
               <div className="flex flex-wrap gap-4">
                 {['Ui/Ux', 'Web Design', 'Software', 'App'].map((tag, idx) => (
-                  <span key={idx} className="border border-[#f7a400] bg-[#f7a400] px-6 py-2 rounded-[5px] text-[12px] md:text-[14px] font-semibold cursor-pointer hover:bg-[#02040a] hover:border-[#f7a400] text-black hover:text-white transition-all text-center">
+                  <span 
+                    key={idx} 
+                    onClick={() => setSearchQuery(tag)} // ট্যাগ ক্লিক করলে সার্চ হবে
+                    className="border border-[#f7a400] bg-[#f7a400] px-6 py-2 rounded-[5px] text-[12px] md:text-[14px] font-semibold cursor-pointer hover:bg-[#02040a] hover:border-[#f7a400] text-black hover:text-white transition-all text-center"
+                  >
                     {tag}
                   </span>
                 ))}
@@ -248,41 +165,51 @@ const BlogContent = () => {
           </aside>
 
           <main className="flex-1 flex flex-col gap-10 bg-[#0a0a0a]">
-            {displayedPosts.map((post) => (
-              <article key={post.id} className="bg-[#0a0a0a] border border-[#ffffff15] rounded-[5px] overflow-hidden flex flex-col group">
-                <div className="relative overflow-hidden w-full h-[300px]">
-                   <div className="absolute top-5 left-5 z-10 bg-[#f7a400] text-white px-5 py-1.5 rounded text-[11px] font-bold tracking-widest shadow-lg">
-                      {post.category}
-                   </div>
-                   <img src={post.img} alt="article" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-1000" />
-                </div>
-                
-                <div className="p-6 md:p-10">
-                  <div className="flex items-center gap-3 mb-4 text-white">
-                    <span className="text-[10px] md:text-[12px] font-medium">{post.date}</span>
-                    <span className="w-1.5 h-1.5 bg-white rounded-full"></span>
-                    <span className="text-[12px] md:text-[13px] font-medium">By {post.author}</span>
+            {/* সার্চে কিছু না পাওয়া গেলে Empty State */}
+            {displayedPosts.length === 0 ? (
+               <div className="flex flex-col items-center justify-center py-20 text-center">
+                  <SearchX size={48} className="text-[#f7a400] mb-4 opacity-50" />
+                  <p className="text-white/60 text-lg">No blogs found matching your search.</p>
+                  <button onClick={() => {setSearchQuery(''); setActiveCategory('All')}} className="text-[#f7a400] mt-4 underline">Clear all filters</button>
+               </div>
+            ) : (
+              displayedPosts.map((post) => (
+                <article key={post._id} className="bg-[#0a0a0a] border border-[#ffffff15] rounded-[5px] overflow-hidden flex flex-col group">
+                  <div className="relative overflow-hidden w-full h-[300px]">
+                     <div className="absolute top-5 left-5 z-10 bg-[#f7a400] text-white px-5 py-1.5 rounded text-[11px] font-bold tracking-widest shadow-lg">
+                        {post.category}
+                     </div>
+                     <img src={fixImagePath(post.image)} alt="article" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-1000" />
                   </div>
+                  
+                  <div className="p-6 md:p-10">
+                    <div className="flex items-center gap-3 mb-4 text-white">
+                      <span className="text-[10px] md:text-[12px] font-medium">
+                        {new Date(post.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                      </span>
+                      <span className="w-1.5 h-1.5 bg-white rounded-full"></span>
+                      <span className="text-[12px] md:text-[13px] font-medium">By {post.author || "Admin"}</span>
+                    </div>
 
-                  <h2 className=" text-[18px] sm:text-[20px] md:text-[28px] font-bold mb-5 text-white leading-tight  transition-colors duration-300">
-                    {post.title}
-                  </h2>
+                    <h2 className=" text-[18px] sm:text-[20px] md:text-[28px] font-bold mb-5 text-white leading-tight">
+                      {post.title}
+                    </h2>
 
-                  <p className="text-white text-[14px] md:text-[18px] leading-[1.3] mb-8 max-w-7xl ">
-                    {post.description}
-                  </p>
+                    <p className="text-white text-[14px] md:text-[18px] leading-[1.3] mb-8 max-w-7xl ">
+                      {post.description}
+                    </p>
 
-                  <Link 
-                    to={`/blog/${post.url}`} 
-                    className="inline-block bg-[#f7a400] border-2 border-[#F7A400] text-black px-6 py-2 rounded-[5px] hover:bg-[#02050A] hover:text-white transition-all text-[14px] md:text-[15px] font-semibold w-fit text-center"
-                  >
-                    Learn more
-                  </Link>
-                </div>
-              </article>
-            ))}
+                    <Link 
+                      to={`/blog/${post.url}`} 
+                      className="inline-block bg-[#f7a400] border-2 border-[#F7A400] text-black px-6 py-2 rounded-[5px] hover:bg-[#02050A] hover:text-white transition-all text-[14px] md:text-[15px] font-semibold w-fit text-center"
+                    >
+                      Learn more
+                    </Link>
+                  </div>
+                </article>
+              ))
+            )}
 
-            {/* Load More Button - Sudhu jodi aro post thake tokhon dekhabe */}
             {visibleCount < filteredPosts.length && (
               <div className="flex justify-center mt-6">
                 <button 
@@ -294,7 +221,6 @@ const BlogContent = () => {
               </div>
             )}
           </main>
-
         </div>
       </div>
     </div>

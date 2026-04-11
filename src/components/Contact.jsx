@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Send, CheckCircle2, Phone, Circle, CheckCircle, ChevronDown } from 'lucide-react';
+import axios from 'axios'; // axios এড করা হয়েছে
+import { Send, CheckCircle2, Phone, Circle, CheckCircle, ChevronDown, X } from 'lucide-react'; // X আইকন এড করা হয়েছে
 import profileImg from '../assets/images/Md. Maharab Biswas Api.jpg';
 
 const Contact = () => {
@@ -9,11 +10,45 @@ const Contact = () => {
   // States for Selection
   const [budget, setBudget] = useState('');
   const [service, setService] = useState('');
-  const [isOpen, setIsOpen] = useState(false); // Dropdown control er jonno
+  const [isOpen, setIsOpen] = useState(false);
+  
+  // নতুন স্টেট: পপ-আপ মোডাল দেখানোর জন্য
+  const [showSuccess, setShowSuccess] = useState(false);
 
-  const handleSubmit = (e) => {
+  // Form Data State (ডিজাইন ঠিক রেখে ডাটা ধরার জন্য)
+  const [formData, setFormData] = useState({
+    fullName: '',
+    email: '',
+    whatsapp: '',
+    details: ''
+  });
+
+  const handleChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    navigate('/');
+    
+    const payload = {
+      ...formData,
+      service,
+      budget
+    };
+
+    try {
+      const res = await axios.post('http://localhost:5000/api/contacts/submit', payload);
+      if (res.data.success) {
+        // মেসেজ পাঠানোর পর পপ-আপ দেখানো হবে
+        setShowSuccess(true);
+        // ফর্ম রিসেট (ঐচ্ছিক)
+        setFormData({ fullName: '', email: '', whatsapp: '', details: '' });
+        setBudget('');
+        setService('');
+      }
+    } catch (err) {
+      alert("❌ Failed to send message.");
+    }
   };
 
   const budgetOptions = ["Less than $1K", "$1K - $5K", "$5K - $10K", "$10K - $20K", "More than $20K"];
@@ -22,10 +57,55 @@ const Contact = () => {
   return (
     <section className="w-full bg-[#050505] py-12 md:py-18 font-poppins text-white overflow-hidden relative">
       
+      {/* ----------------------------------------------------------- */}
+      {/* 🌟 SUCCESS POP-UP MODAL (Screen Shot অনুসারী ডিজাইন) 🌟 */}
+      {/* ----------------------------------------------------------- */}
+      {showSuccess && (
+        <div className="fixed inset-0 z-[999] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 animate-fadeIn">
+          {/* মোডাল বক্স - হুবহু স্ক্রিনশটের মত গোল বর্ডার এবং গ্লো */}
+          <div className="relative border border-[#F7A400] rounded-[30px] bg-[#0A0A0A] p-10 md:p-14 text-center shadow-[0_0_60px_rgba(247,164,0,0.3)] max-w-[500px] w-full animate-scaleIn">
+            
+            {/* ক্লোজ বাটন (ঐচ্ছিক, সৌন্দর্যের জন্য) */}
+            <button onClick={() => setShowSuccess(false)} className="absolute top-5 right-5 text-white/30 hover:text-white transition-colors">
+                <X size={20} />
+            </button>
+
+            {/* সোনালী চেক আইকন গ্লো সহ */}
+            <div className="flex justify-center mb-10">
+              <div className="relative">
+                <div className="absolute inset-0 bg-[#F7A400] rounded-full blur-2xl opacity-40"></div>
+                <CheckCircle size={90} className="text-[#F7A400] relative z-10" />
+              </div>
+            </div>
+
+            {/* টেক্সট কন্টেন্ট */}
+            <h2 className="text-4xl font-black text-white tracking-tighter mb-4">
+              Message Sent!
+            </h2>
+            <p className="text-gray-400 text-lg leading-relaxed mb-12">
+              We have received your message. Our team will get back to you shortly.
+            </p>
+
+            {/* সম্পূর্ণ গোল্ডেন বাটন (আপনার স্ক্রিনশটের মতো) */}
+            <button 
+              onClick={() => {
+                setShowSuccess(false);
+                navigate('/'); // হোম পেজে নিয়ে যাবে
+              }}
+              className="w-full bg-[#F7A400] text-black text-xl font-bold py-5 rounded-[15px] hover:bg-white transition-all duration-300 shadow-lg active:scale-95"
+            >
+              Awesome!
+            </button>
+          </div>
+        </div>
+      )}
+      {/* ----------------------------------------------------------- */}
+
+
       {/* Background Decorative Glow */}
       <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-[#F7A400]/5 rounded-full blur-[120px] pointer-events-none"></div>
 
-      <div className="max-w-[1445px] mx-auto px-6 md:px-12 lg:px-16 xl:px-14 relative z-10">
+      <div className="max-w-[1445px] mx-auto px-2 md:px-12 lg:px-16 xl:px-14 relative z-10">
         
         {/* Main Wrapper Box */}
         <div className="border border-white/10 rounded-[5px] bg-[#02050A]/50 p-6 md:p-10 lg:p-10 xl:p-14">
@@ -99,56 +179,55 @@ const Contact = () => {
                 <div className="space-y-6">
                   <div className="space-y-3">
                     <label className="text-[14px] md:text-[16px] font-semibold  text-white">Full Name</label>
-                    <input type="text" placeholder="Garry A. Leighton" required className="w-full bg-white/5 border border-white/10 rounded-[5px] p-2 md:p-2 focus:border-[#F7A400] outline-none transition-all placeholder:text-white/20" />
+                    <input name="fullName" value={formData.fullName} onChange={handleChange} type="text" placeholder="Garry A. Leighton" required className="w-full bg-white/5 border border-white/10 rounded-[5px] p-2 md:p-2 focus:border-[#F7A400] outline-none transition-all placeholder:text-white/20" />
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div className="space-y-3">
                       <label className="text-[14px] md:text-[16px] font-semibold  text-white">Your Email</label>
-                      <input type="email" placeholder="yourmail@gmail.com" required className="w-full bg-white/5 border border-white/10 rounded-[5px] p-2 md:p-2 focus:border-[#F7A400] outline-none transition-all placeholder:text-white/20" />
+                      <input name="email" value={formData.email} onChange={handleChange} type="email" placeholder="yourmail@gmail.com" required className="w-full bg-white/5 border border-white/10 rounded-[5px] p-2 md:p-2 focus:border-[#F7A400] outline-none transition-all placeholder:text-white/20" />
                     </div>
                     <div className="space-y-3">
                       <label className="text-[14px] md:text-[16px] font-semibold  text-white">Whatsapp Number</label>
-                      <input type="tel" placeholder="1123 1234567" className="w-full bg-white/5 border border-white/10 rounded-[5px] p-2 md:p-2 focus:border-[#F7A400] outline-none transition-all placeholder:text-white/20" />
+                      <input name="whatsapp" value={formData.whatsapp} onChange={handleChange} type="tel" placeholder="1123 1234567" className="w-full bg-white/5 border border-white/10 rounded-[5px] p-2 md:p-2 focus:border-[#F7A400] outline-none transition-all placeholder:text-white/20" />
                     </div>
                   </div>
                 </div>
 
-                {/* 1. Select Service - Custom Dropdown (No Blue Color) */}
                 {/* 1. Select Service - Custom Dropdown */}
-<div className="space-y-4">
-  <label className="text-[14px] md:text-[16px] font-semibold text-white">Select Service</label>
-  <div className="relative">
-    <div 
-      onClick={() => setIsOpen(!isOpen)}
-      className={`w-full bg-white/5 border rounded-[5px] p-2 md:p-2 text-white flex justify-between items-center cursor-pointer transition-all ${
-        service || isOpen ? 'border-[#F7A400]' : 'border-white/10 hover:border-white/30'
-      }`}
-    >
-      <span className={service ? "text-white" : "text-white/20"}>
-        {service || "Choose a service"}
-      </span>
-      <ChevronDown size={18} className={`transition-transform ${isOpen ? 'rotate-180 text-[#F7A400]' : 'text-white/50'}`} />
-    </div>
+                <div className="space-y-4">
+                  <label className="text-[14px] md:text-[16px] font-semibold text-white">Select Service</label>
+                  <div className="relative">
+                    <div 
+                      onClick={() => setIsOpen(!isOpen)}
+                      className={`w-full bg-white/5 border rounded-[5px] p-2 md:p-2 text-white flex justify-between items-center cursor-pointer transition-all ${
+                        service || isOpen ? 'border-[#F7A400]' : 'border-white/10 hover:border-white/30'
+                      }`}
+                    >
+                      <span className={service ? "text-white" : "text-white/20"}>
+                        {service || "Choose a service"}
+                      </span>
+                      <ChevronDown size={18} className={`transition-transform ${isOpen ? 'rotate-180 text-[#F7A400]' : 'text-white/50'}`} />
+                    </div>
 
-    {isOpen && (
-      <div className="absolute z-50 w-full mt-2 bg-[#050505] border border-white/10 rounded-[5px] overflow-hidden shadow-2xl">
-        {serviceOptions.map((srv) => (
-          <div
-            key={srv}
-            onClick={() => {
-              setService(srv);
-              setIsOpen(false);
-            }}
-            className="px-4 py-3 text-white hover:bg-[#F7A400] hover:text-black cursor-pointer transition-colors"
-          >
-            {srv}
-          </div>
-        ))}
-      </div>
-    )}
-  </div>
-</div>
+                    {isOpen && (
+                      <div className="absolute z-50 w-full mt-2 bg-[#050505] border border-white/10 rounded-[5px] overflow-hidden shadow-2xl">
+                        {serviceOptions.map((srv) => (
+                          <div
+                            key={srv}
+                            onClick={() => {
+                              setService(srv);
+                              setIsOpen(false);
+                            }}
+                            className="px-4 py-3 text-white hover:bg-[#F7A400] hover:text-black cursor-pointer transition-colors"
+                          >
+                            {srv}
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </div>
 
                 {/* 2. Project Budget Selection */}
                 <div className="space-y-4">
@@ -178,7 +257,7 @@ const Contact = () => {
 
                 <div className="space-y-3">
                   <label className="text-[14px] md:text-[16px] font-bold  text-white">Project Details</label>
-                  <textarea rows="4" placeholder="I’m planning a complete redesign for my website and SaaS platform........" className="w-full bg-white/5 border border-white/10 rounded-[5px] p-4 focus:border-[#F7A400] outline-none transition-all resize-none placeholder:text-white/20"></textarea>
+                  <textarea name="details" value={formData.details} onChange={handleChange} rows="4" placeholder="I’m planning a complete redesign for my website and SaaS platform........" className="w-full bg-white/5 border border-white/10 rounded-[5px] p-4 focus:border-[#F7A400] outline-none transition-all resize-none placeholder:text-white/20"></textarea>
                 </div>
 
                 {/* Line-up Hover Button */}
@@ -194,6 +273,17 @@ const Contact = () => {
           </div>
         </div>
       </div>
+
+      {/* পপ-আপের জন্য কিছু CSS এনিমেশন (ঐচ্ছিক, সৌন্দর্যের জন্য) */}
+      <style>
+        {`
+          @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+          @keyframes scaleIn { from { transform: scale(0.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+          .animate-fadeIn { animation: fadeIn 0.3s ease-out; }
+          .animate-scaleIn { animation: scaleIn 0.3s ease-out; }
+        `}
+      </style>
+
     </section>
   );
 };

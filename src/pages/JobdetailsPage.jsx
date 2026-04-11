@@ -1,41 +1,81 @@
-import React, { useEffect } from 'react';
-import { FaMapMarkerAlt, FaBriefcase, FaMoneyBillWave, FaClock, FaCheckCircle } from 'react-icons/fa';
-// ১. এখানে Link ইম্পোর্ট করলাম
-import { Link } from 'react-router-dom';
+import React, { useEffect, useState } from 'react';
+import { useParams, Link } from 'react-router-dom';
+import axios from 'axios';
+import { 
+    FaMapMarkerAlt, FaBriefcase, FaMoneyBillWave, 
+    FaClock, FaCheckCircle, FaInfoCircle, FaShieldAlt 
+} from 'react-icons/fa';
 import Contact from '../components/Contact';
 
 const JobdetailsPage = () => {
-    
-    useEffect(() => {
-        window.scrollTo({ top: 0, behavior: 'instant' });
-    }, []);
+    const { id } = useParams();
+    const [job, setJob] = useState(null);
+    const [loading, setLoading] = useState(true);
 
     const sectionPadding = "max-w-[1300px] mx-auto px-6 sm:px-10 md:px-16";
 
+    useEffect(() => {
+        window.scrollTo({ top: 0, behavior: 'instant' });
+        
+        const fetchJobDetails = async () => {
+            try {
+                setLoading(true);
+                const res = await axios.get(`http://localhost:5000/api/jobs/${id}`);
+                setJob(res.data);
+            } catch (err) { 
+                console.error("API Error:", err);
+                setJob(null);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        if (id) fetchJobDetails();
+    }, [id]);
+
+    if (loading) {
+        return (
+            <div className="bg-[#02050a] min-h-screen flex flex-col justify-center items-center">
+                <div className="w-12 h-12 border-4 border-[#F7A400] border-t-transparent rounded-full animate-spin mb-4"></div>
+                <p className="text-white font-bold font-poppins">Loading Job Details...</p>
+            </div>
+        );
+    }
+
+    if (!job) {
+        return (
+            <div className="bg-[#02050a] min-h-screen text-white flex flex-col justify-center items-center text-center px-4 font-poppins">
+                <h2 className="text-2xl font-bold mb-4 text-red-500">Job Not Found!</h2>
+                <Link to="/careers" className="text-[#F7A400] underline">Back to Careers</Link>
+            </div>
+        );
+    }
+
     return (
         <main className="bg-[#02050a] font-poppins min-h-screen pt-28 pb-20 text-white">
-            
             <div className={sectionPadding}>
                 {/* --- Header Section --- */}
                 <div className="border-b border-white/10 pb-10 mb-12">
-                    <h1 className="text-[26px] md:text-[32px] lg:text-[40px] font-bold text-white mb-8">Key Account Manager</h1>
+                    <h1 className="text-[26px] md:text-[32px] lg:text-[40px] font-bold text-white mb-8">
+                        {job.title}
+                    </h1>
 
                     <div className="flex flex-wrap gap-6 md:gap-8 text-white/90">
                         <div className="flex items-center gap-3 text-[14px] md:text-[16px]">
                             <FaMapMarkerAlt className="text-[#F7A400]" />
-                            <span>Location: On-site</span>
+                            <span>Location: {job.location}</span>
                         </div>
                         <div className="flex items-center gap-3 text-[14px] md:text-[16px]">
                             <FaBriefcase className="text-[#F7A400]" />
-                            <span>Type: Full Time</span>
+                            <span>Type: {job.jobType}</span>
                         </div>
                         <div className="flex items-center gap-3 text-[14px] md:text-[16px]">
                             <FaMoneyBillWave className="text-[#F7A400]" />
-                            <span>Salary: Negotiable</span>
+                            <span>Salary: {job.salary}</span>
                         </div>
                         <div className="flex items-center gap-3 text-[14px] md:text-[16px]">
                             <FaClock className="text-[#F7A400]" />
-                            <span>Shift: Night Shift (North America)</span>
+                            <span>Shift: {job.shift}</span>
                         </div>
                     </div>
                 </div>
@@ -43,87 +83,109 @@ const JobdetailsPage = () => {
                 {/* --- Content Grid --- */}
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-16">
                     
-                    {/* Left Column: Details */}
                     <div className="lg:col-span-2 space-y-16">
-                        
-                        {/* Intro */}
-                        <section>
-                            <h2 className="text-[20px] md: text-[22px] font-bold text-[#F7A400] mb-6">What do we look for:</h2>
-                            <div className="text-white text-[16px] md:text-[18px] leading-relaxed space-y-6">
-                                <p>We’re looking for a highly motivated <span className="text-white font-bold underline decoration-[#F7A400]">Key Account Manager</span> to join our dynamic sales team. The best part? No prior experience or internships are required. If you have excellent English communication skills and come from a business or tech (CSE) background and have a passion for sales, this opportunity is made for you.</p>
-                                <p>Global sales is one of the fastest-growing and most in-demand industries today, and very few are stepping up to lead. You can be one of the few — the superheroes of this space.</p>
-                                <div className="bg-[#F7A400]/10 border-l-8 border-[#F7A400] p-6 italic text-white text-[14px] md:text-[16px] rounded-[5px]">
-                                    "If you're in your final semester with just 1–2 months left before graduation, you're highly welcome — and will be given priority for this position."
-                                </div>
-                            </div>
-                        </section>
+                        {job.sections && job.sections.map((section, index) => (
+                            <section key={index}>
+                                {/* 1. Heading */}
+                                {section.type === 'heading' && (
+                                    <h2 className="text-[20px] md:text-[22px] font-bold text-[#F7A400] mb-6 border-l-4 border-[#F7A400] pl-4">
+                                        {section.value}
+                                    </h2>
+                                )}
 
-                        {/* Responsibilities */}
-                        <section>
-                            <h2 className="text-18px] md:text-[20px] font-bold text-[#F7A400] mb-8">Core Responsibilities:</h2>
-                            <ul className="grid gap-4 md:gap-5">
-                                {[
-                                    "Engage with international clients (USA, Europe, Middle East) through professional English communication.",
-                                    "Understand client needs and effectively present relevant service solutions.",
-                                    "Conduct industry and competitor research to understand global market trends.",
-                                    "Identify potential opportunities aligned with our services and target industries.",
-                                    "Develop and maintain strong, long-term relationships with international clients.",
-                                    "Provide consistent follow-up and support to move prospects through the sales funnel.",
-                                    "Track communications, meetings, and deal progress using CRM tools.",
-                                    "Participate in training sessions and stay updated on global business practices."
-                                ].map((item, i) => (
-                                    <li key={i} className="flex gap-4 text-white text-[14px] md:text-[16px] leading-snug">
-                                        <FaCheckCircle className="text-[#F7A400] mt-1 shrink-0 text-2xl" />
-                                        <span>{item}</span>
-                                    </li>
-                                ))}
-                            </ul>
-                        </section>
+                                {/* 2. Text / Summary Style */}
+                                {(section.type === 'text' || section.type === 'summary') && (
+                                    <div className={`text-white/80 text-[16px] md:text-[18px] leading-relaxed p-6 ${section.type === 'summary' ? 'bg-white/5 border border-white/10 rounded-2xl italic shadow-inner' : ''}`}>
+                                        {section.type === 'summary' && <FaInfoCircle className="text-[#F7A400] mb-3 text-2xl" />}
+                                        <p>{section.value}</p>
+                                    </div>
+                                )}
 
-                        {/* Requirements */}
-                        <section className="bg-white/5 p-10 rounded-2xl border border-white/10">
-                            <h2 className="text-[18px] md:text-[20px] font-bold text-[#F7A400] mb-8">Core Requirements:</h2>
-                            <div className="space-y-6 text-white text-[16px] md:text-[18px]">
-                                <p>• <span className="text-[#F7A400] font-bold">English Fluency:</span> You must be a clear, confident, and fluent communicator—both written and spoken. This is the most important skill.</p>
-                                <p>• <span className="text-[#F7A400] font-bold">Background:</span> Foundational knowledge in business or computer science/technology.</p>
-                                <p>• <span className="text-[#F7A400] font-bold">Education:</span> We don’t care about your CGPA. Dropouts or final semester students are encouraged.</p>
-                                <p>• <span className="text-[#F7A400] font-bold">Essential:</span> Applicants must be open to working <span className="underline decoration-2 underline-offset-4">night shifts</span> (North American Time).</p>
-                            </div>
-                        </section>
+                                {/* 3. List Style (Standard Bullets) */}
+                               {/* 3. List Style (With Title Support) */}
+{section.type === 'list' && (
+    <div className="space-y-6">
+        {/* যদি লিস্টের জন্য কোনো টাইটেল থাকে (অ্যাডমিন থেকে আসা) */}
+        {section.value && (
+            <h2 className="text-[20px] md:text-[22px] font-bold text-[#F7A400] mb-6 border-l-4 border-[#F7A400] pl-4">
+                {section.value}
+            </h2>
+        )}
 
+        <ul className="grid gap-4 md:gap-5">
+            {section.items && section.items.map((item, i) => (
+                <li key={i} className="flex gap-4 text-white/90 text-[14px] md:text-[16px]">
+                    <FaCheckCircle className="text-[#F7A400] mt-1 shrink-0 text-xl md:text-2xl" />
+                    <span>{item}</span>
+                </li>
+            ))}
+        </ul>
+    </div>
+)}
+
+                                {/* 4. Core Requirements Style (Label & Description) */}
+                                {/* 4. Requirements Style (Updated for List View) */}
+{section.type === 'requirements' && (
+    <div className="space-y-6">
+        <h3 className="text-[18px] font-bold text-white flex items-center gap-2 mb-4 uppercase tracking-wider text-white/70">
+            <FaShieldAlt className="text-[#F7A400]"/> {section.value || "Core Requirements"}
+        </h3>
+        
+        {/* এখানে grid-cols-1 রাখা হয়েছে যাতে একটির নিচে একটি আসে */}
+        <div className="grid grid-cols-1 gap-5">
+            {section.requirementItems && section.requirementItems.map((item, i) => (
+                <div key={i} className="flex flex-col sm:flex-row gap-2 text-[16px] md:text-[18px] leading-relaxed">
+                    {/* ডট বা বুলেট পয়েন্টের মতো কাজ করবে */}
+                    <span className="text-[#F7A400] font-bold shrink-0">
+                        • {item.label}:
+                    </span>
+                    <span className="text-white/90">
+                        {item.desc}
+                    </span>
+                </div>
+            ))}
+        </div>
+    </div>
+)}
+                            </section>
+                        ))}
                     </div>
 
-                    {/* Right Column: Sidebar / Benefits */}
+                    {/* Right Column: Sidebar (Benefits & Apply) */}
                     <div className="lg:col-span-1">
                         <div className="bg-[#0a0a0a] border border-white/20 p-10 rounded-3xl sticky top-32 shadow-2xl">
                             <h2 className="text-[18px] md:text-[20px] font-bold text-white mb-8 border-b border-white/10 pb-4">Benefits & Perks</h2>
-                            <ul className="space-y-4 md:space-y-5  mb-10">
+                            <ul className="space-y-4 md:space-y-5 mb-10">
                                 {[
-                                    "Negotiable Salary + Commission",
+                                    "Competitive Salary + Commission",
                                     "Two Weekly Holidays",
                                     "Subsidized Lunch & Snacks",
                                     "Two Festival Bonuses",
                                     "Yearly Salary Review",
                                     "Health Insurance (After 1 Year)",
-                                    "Indoor Games (Table Tennis, Foosball)",
-                                    "Long Service Benefit"
+                                    "Indoor Games Facilities",
+                                    "Excellent Work Environment"
                                 ].map((benefit, i) => (
-                                    <li key={i} className="flex items-center gap-4 text-[14px] md:text-[16px] text-white font-medium">
-                                        <div className="w-2.5 h-2.5 rounded-full bg-[#F7A400] shadow-[0_0_10px_#F7A400]"></div>
+                                    <li key={i} className="flex items-center gap-4 text-[14px] md:text-[15px] text-white/90 font-medium">
+                                        <div className="w-2 h-2 rounded-full bg-[#F7A400] shadow-[0_0_10px_#F7A400]"></div>
                                         {benefit}
                                     </li>
                                 ))}
                             </ul>
                             
-                            {/* ২. এই যে এখানে লিংক অ্যাড করে দিলাম */}
-                           <Link to="/apply-job" className="w-full block">
-                            <button className="bg-[#F7A400] text-black hover:text-white font-semibold py-2 px-8 md:px-10 rounded-[5px] border-2 border-[#F7A400] transition-all duration-300 text-[12px] md:text-[15px] shadow-lg hover:bg-[#02050A] ">
-                              Apply for this job
-                              </button>
-                             </Link>
+                           <Link 
+            to="/apply-job" 
+            state={{ jobTitle: job.title }} 
+            className="w-full block"
+        >
+            <button className="bg-[#F7A400] text-black hover:text-white font-bold py-4 px-8 rounded-[5px] border-2 border-[#F7A400] transition-all duration-300 text-[15px] shadow-lg hover:bg-transparent w-full uppercase tracking-wider">
+                Apply Now
+            </button>
+        </Link>
                             
-                            <p className="text-center text-white/50 mt-6 text-sm">
-                                Send your CV to: careers@campaignsquat.com
+                            <p className="text-center text-white/40 mt-8 text-xs leading-relaxed">
+                                Or send your resume to: <br/>
+                                <span className="text-white/80 font-medium select-all">careers@campaignsquat.com</span>
                             </p>
                         </div>
                     </div>
@@ -131,7 +193,8 @@ const JobdetailsPage = () => {
                 </div>
             </div>
             
-            <div className="mt-20">
+            {/* Contact Section */}
+            <div className="mt-32">
                 <Contact />
             </div>
         </main>

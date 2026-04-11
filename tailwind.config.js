@@ -7,8 +7,10 @@ export default {
   theme: {
     extend: {
       fontFamily: {
-        // 'poppins' 
+        // ১. বডি টেক্সটের জন্য Poppins
         poppins: ['Poppins', 'sans-serif'],
+        // ২. হেডিং এবং স্পেশাল ডিজাইনের জন্য Outfit
+        outfit: ['Outfit', 'sans-serif'],
       },
     },
   },

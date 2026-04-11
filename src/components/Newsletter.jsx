@@ -17,7 +17,7 @@ const Newsletter = () => {
       <div className="absolute inset-0 bg-[#02050A]/80 z-0"></div>
 
       {/* Main Content Container: max-w-1440px and centered */}
-      <div className="max-w-[1440px] mx-auto px-6 sm:px-10 md:px-12 lg:px-16 relative z-10">
+      <div className="max-w-[1440px] mx-auto px- sm:px-10 md:px-12 lg:px-16 relative z-10">
         <div className="flex flex-col lg:flex-row items-center justify-between gap-10">
           
           {/* Text Content */}
@@ -41,7 +41,7 @@ const Newsletter = () => {
               />
               <button 
                 type="submit"
-                className=" bg-[#f7a400] text-black hover:text-white font-semibold px-6 md:px-8 py-2 text-[14px] md:text-[15px] rounded-[5px] flex items-center justify-center  border-2 border-[#F7A400] hover:bg-[#02050A]  transition-all duration-300  group "
+                className=" bg-[#f7a400] text-black hover:text-white font-semibold px-2 md:px-8 py-2 text-[14px] md:text-[15px] rounded-[5px] flex items-center justify-center  border-2 border-[#F7A400] hover:bg-[#02050A]  transition-all duration-300  group "
               >
                 Submit Now
                 <Send size={18} className="group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" />

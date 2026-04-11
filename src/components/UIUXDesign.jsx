@@ -27,6 +27,7 @@ import img6 from '../assets/images/original-ad1e136638ef25805d74bc2a9ff8ab7e.web
 import img7 from '../assets/images/479f22210697035.Y3JvcCwyNjA5LDIwNDAsMTM1LDA.png';
 import img8 from '../assets/images/original-e2914736408e4069af7f75a4d351c1b7.webp';
 import BrandSlider from './BrandSlider';
+import DynamicSchema from './DynamicSchema';
 
 const UiUxDesign = () => {
     useEffect(() => {
@@ -195,6 +196,8 @@ const UiUxDesign = () => {
     const points = ["User-Centric Methodology", "Data-Driven Design Strategy", "High-Fidelity Interaction Design", "Conversion Rate Optimization (CRO)", "Scalable Design Systems"];
 
     return (
+        <>
+        <DynamicSchema  pageTitle="UI/UX Design Services" />
         <main className="overflow-hidden font-poppins bg-[#02050a]">
             <Helmet>
                 <title>UI/UX Design Services | Campaignsquat Ltd. | Custom Product Design</title>
@@ -449,6 +452,7 @@ const UiUxDesign = () => {
             </section>
             <Questions />
         </main>
+        </>
     );
 };
 

@@ -8,7 +8,7 @@ const ContactMap = () => {
 
   return (
     <section className="w-full bg-[#02050A] py-12 md:py-20">
-      <div className="max-w-[1445px] mx-auto px-8 md:px-16 lg:px-22 xl:px-16 space-y-20">
+      <div className="max-w-[1445px] mx-auto px-2 md:px-16 lg:px-22 xl:px-16 space-y-20">
         
         {/* --- UK Office Section (First) --- */}
         <div>

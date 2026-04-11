@@ -12,6 +12,12 @@ dist
 dist-ssr
 *.local
 
+# --- এই অংশটুকু অবশ্যই যোগ করুন ---
+.env
+.env.local
+uploads/
+# ------------------------------
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

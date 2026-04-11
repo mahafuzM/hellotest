@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useLocation, Link, useParams } from 'react-router-dom';
+import { useLocation, Link, useParams, useNavigate } from 'react-router-dom'; // ১. useNavigate যোগ করা হয়েছে
 
 import { 
   FaFacebookF, FaInstagram, FaLinkedinIn, FaTwitter, FaShareAlt, FaChevronLeft,
@@ -13,6 +13,7 @@ import { projectsFullDetails } from '../data/projectsData';
 const CaseStudyDetails = () => {
   const { title: slug } = useParams(); 
   const location = useLocation();
+  const navigate = useNavigate(); // ২. হুক কল করা হয়েছে
   
   const [projectContent, setProjectContent] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -69,7 +70,7 @@ const CaseStudyDetails = () => {
       <h2 className="text-2xl mb-4">Project Not Found!</h2>
       <p className="mb-6 text-gray-400">Slug: {slug}</p>
       {/* URL Update here */}
-      <Link to="/home/projects" className="text-[#f7a400] underline">Back to Projects</Link>
+      <Link to="/our-projects" className="text-[#f7a400] underline">Back to Projects</Link>
     </div>
   );
 
@@ -77,12 +78,15 @@ const CaseStudyDetails = () => {
     <section className="w-full bg-[#0A0A0A] font-['Poppins'] text-white selection:bg-white selection:text-black">
       <div className="max-w-[1440px] mx-auto px-6 md:px-20 lg:px-30 text-left">
         
-        {/* Navigation - URL Updated to /home/projects */}
+        {/* Navigation - ৩. লজিক আপডেট করা হয়েছে যাতে ট্যাব নষ্ট না হয় */}
         <div className="py-8 md:py-10">
-          <Link to="/home/projects" className="inline-flex items-center gap-2 text-white hover:text-[#f7a400] transition-colors">
+          <button 
+            onClick={() => navigate(-1)} 
+            className="inline-flex items-center gap-2 text-white hover:text-[#f7a400] transition-colors"
+          >
             <FaChevronLeft size={14} /> 
             <span className="text-[12px] md:text-[14px] font-medium">Back to Projects</span>
-          </Link>
+          </button>
         </div>
 
         {/* Hero Image */}

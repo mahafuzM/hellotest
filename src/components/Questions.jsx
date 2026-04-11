@@ -1,35 +1,36 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
 import { Plus, Minus } from 'lucide-react';
 
 const Questions = () => {
   const [openIndex, setOpenIndex] = useState(0);
+  const [faqs, setFaqs] = useState([]); 
+  const [loading, setLoading] = useState(true);
 
-  const faqs = [
-    {
-      question: "What core services does Campaignsquat Ltd provide?",
-      answer: "We specialize in full-cycle Software Development, high-end UI/UX Design, and performance-driven Website Design & Development. From custom ERP/CRM systems to conversion-focused websites, we engineer solutions tailored to your business goals."
-    },
-    {
-      question: "How long does a typical project take from start to finish?",
-      answer: "Timeline varies based on complexity. A standard Website Design & Development project usually takes 3-6 weeks, while complex Software Development or enterprise systems may take longer. We follow a strategic 4-step process to ensure timely and precise delivery."
-    },
-    {
-      question: "Do you offer redesign services for existing platforms?",
-      answer: "Yes. We provide comprehensive UI/UX Design audits and technical upgrades to transform outdated systems into modern, high-performing digital products. We focus on improving both aesthetics and backend efficiency."
-    },
-    {
-      question: "Why should I choose custom software over ready-made solutions?",
-      answer: "Custom Software Development is built specifically for your unique workflows, allowing for better scalability, tighter security, and seamless integration. Unlike off-the-shelf products, our solutions grow with your business without unnecessary monthly seat costs."
-    },
-    {
-      question: "How do we track the progress of our project?",
-      answer: "Transparency is our priority. From the initial Discovery phase to final Deployment, we provide regular milestone updates and maintain open communication channels to ensure the final product aligns perfectly with your vision."
-    }
-  ];
+  useEffect(() => {
+    const fetchFaqs = async () => {
+      try {
+        // API URL আপনার লোকাল সার্ভার অনুযায়ী ঠিক আছে
+        const res = await axios.get('http://localhost:5000/api/faqs');
+        if (res.data) {
+          // সিরিয়াল মেইনটেইন করে স্টেটে সেট করা
+          const sortedFaqs = res.data.sort((a, b) => (a.order || 0) - (b.order || 0));
+          setFaqs(sortedFaqs);
+        }
+      } catch (err) {
+        console.error("FAQ fetch error:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchFaqs();
+  }, []);
+
+  if (loading) return null; 
 
   return (
     <section className="w-full bg-[#02050A] py-8 md:py-10 overflow-hidden font-poppins">
-      <div className="max-w-[1445px] mx-auto px-5 sm:px-10 md:px-16">
+      <div className="max-w-[1445px] mx-auto px- sm:px-10 md:px-16">
         
         {/* Header Section */}
         <div className="text-center mb-12 md:mb-16">
@@ -45,7 +46,8 @@ const Questions = () => {
         <div className="space-y-4 md:space-y-4">
           {faqs.map((faq, index) => (
             <div 
-              key={index} 
+              // key হিসেবে _id ব্যবহার করা বেস্ট, না থাকলে ইনডেক্স
+              key={faq._id || index} 
               className={`border transition-all duration-300 rounded-[5px] md:rounded-[5px] ${
                 openIndex === index 
                 ? 'border-[#f7a400] bg-[#0A0A0A]' 
@@ -53,7 +55,7 @@ const Questions = () => {
               }`}
             >
               <button
-                className="w-full flex items-center justify-between p-4 md:p-5   text-left focus:outline-none"
+                className="w-full flex items-center justify-between p-4 md:p-5 text-left focus:outline-none"
                 onClick={() => setOpenIndex(openIndex === index ? -1 : index)}
               >
               
@@ -79,7 +81,6 @@ const Questions = () => {
                   openIndex === index ? 'max-h-[500px] opacity-100' : 'max-h-0 opacity-0'
                 }`}
               >
-          
                 <div className="px-5 md:px-8 pb-6 md:pb-8 text-white text-[14px] md:text-[16px] leading-relaxed font-normal">
                   <div className="h-[1px] w-full bg-gray-800/50 mb-5 md:mb-6"></div>
                   {faq.answer}
